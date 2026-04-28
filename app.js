@@ -24,7 +24,6 @@ const elements = {
   yearFilter: document.querySelector("#yearFilter"),
   monthFilter: document.querySelector("#monthFilter"),
   searchFilter: document.querySelector("#searchFilter"),
-  sourceRows: document.querySelector("#sourceRows"),
   totalProduction: document.querySelector("#totalProduction"),
   totalTarget: document.querySelector("#totalTarget"),
   activeDays: document.querySelector("#activeDays"),
@@ -35,8 +34,6 @@ const elements = {
   trendChart: document.querySelector("#trendChart"),
   modelChart: document.querySelector("#modelChart"),
   insightList: document.querySelector("#insightList"),
-  modelCount: document.querySelector("#modelCount"),
-  savedCount: document.querySelector("#savedCount"),
   modelInputs: document.querySelector("#modelInputs"),
   entryForm: document.querySelector("#entryForm"),
   entryDate: document.querySelector("#entryDate"),
@@ -441,9 +438,6 @@ function updateEntryPreview() {
 
 function renderCustomEntries() {
   const customRecords = getCustomRecords();
-  if (elements.savedCount) {
-    elements.savedCount.textContent = numberFormat(customRecords.length);
-  }
   if (elements.customEntryCount) {
     elements.customEntryCount.textContent = numberFormat(customRecords.length);
   }
@@ -519,12 +513,6 @@ function boot() {
   }
   if (elements.reportProduct) {
     elements.reportProduct.textContent = `${reportData.workbook.reportTitle} • ${reportData.workbook.product}`;
-  }
-  if (elements.sourceRows) {
-    elements.sourceRows.textContent = `${numberFormat(reportData.aggregate.records)} entries`;
-  }
-  if (elements.modelCount) {
-    elements.modelCount.textContent = numberFormat(modelHeaders.length);
   }
 
   if (document.body.classList.contains("dashboard-page")) {
