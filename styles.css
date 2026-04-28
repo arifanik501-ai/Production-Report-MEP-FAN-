@@ -1023,11 +1023,13 @@ tbody tr:hover {
   background: rgba(248, 250, 252, 0.72);
 }
 
-.positive {
+.positive,
+.profit {
   color: var(--good);
 }
 
-.negative {
+.negative,
+.loss {
   color: var(--danger);
 }
 

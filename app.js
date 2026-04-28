@@ -116,6 +116,16 @@ function percent(value) {
   return `${Number.isFinite(value) ? Math.round(value * 100) : 0}%`;
 }
 
+function getProfitLossClass(value) {
+  if (value < 0) {
+    return "profit";
+  }
+  if (value > 0) {
+    return "loss";
+  }
+  return "";
+}
+
 function getMonth(dateValue) {
   const date = new Date(`${dateValue}T00:00:00`);
   return monthOrder[date.getMonth()];
@@ -238,7 +248,7 @@ function renderTableHeader() {
     ...modelHeaders,
     "Total",
     "Target",
-    "Loss/Profit",
+    "Profit/Loss",
     "Remarks",
   ];
   elements.entryTableHead.innerHTML = headers.map((heading) => `<th>${heading}</th>`).join("");
@@ -260,11 +270,11 @@ function renderKpis(filteredRecords) {
   elements.totalTarget.textContent = numberFormat(target);
   elements.shortageTotal.textContent = numberFormat(shortage);
   elements.lossProfit.textContent = numberFormat(lossProfit);
-  elements.lossProfit.className = lossProfit < 0 ? "negative" : "positive";
+  elements.lossProfit.className = getProfitLossClass(lossProfit);
   elements.activeDays.textContent = `${numberFormat(activeDays)} active days`;
   elements.achievementRate.textContent = `${percent(achievement)} achieved`;
   elements.performanceLabel.textContent =
-    lossProfit > 0 ? "under target" : lossProfit < 0 ? "above target" : "balanced";
+    lossProfit > 0 ? "loss" : lossProfit < 0 ? "profit" : "balanced";
 }
 
 function renderTrendChart(filteredRecords) {
@@ -376,7 +386,7 @@ function renderTable(filteredRecords) {
       const modelCells = modelHeaders
         .map((model) => `<td class="model-qty">${numberFormat(record[model])}</td>`)
         .join("");
-      const lossClass = record.lossProfit < 0 ? "negative" : "positive";
+      const lossClass = getProfitLossClass(record.lossProfit);
       return `
         <tr>
           <td class="date-cell">${record.date}</td>
@@ -524,7 +534,7 @@ function renderCustomTableHeader() {
     return;
   }
 
-  const headers = ["Date", ...modelHeaders, "Total", "Target", "Loss/Profit", "Remarks", "Edit"];
+  const headers = ["Date", ...modelHeaders, "Total", "Target", "Profit/Loss", "Remarks", "Edit"];
   elements.customTableHead.innerHTML = headers.map((heading) => `<th>${heading}</th>`).join("");
 }
 
@@ -633,7 +643,7 @@ function renderCustomEntries() {
     .reverse()
     .map((record) => {
       const modelCells = modelHeaders.map((model) => `<td>${numberFormat(record[model])}</td>`).join("");
-      const lossClass = record.lossProfit < 0 ? "negative" : "positive";
+      const lossClass = getProfitLossClass(record.lossProfit);
       return `
         <tr>
           <td>${record.date}</td>
