@@ -318,17 +318,19 @@ function renderTable(filteredRecords) {
 
   elements.entryTableBody.innerHTML = rows
     .map((record) => {
-      const modelCells = modelHeaders.map((model) => `<td>${numberFormat(record[model])}</td>`).join("");
+      const modelCells = modelHeaders
+        .map((model) => `<td class="model-qty">${numberFormat(record[model])}</td>`)
+        .join("");
       const lossClass = record.lossProfit < 0 ? "negative" : "positive";
       return `
         <tr>
-          <td>${record.date}</td>
-          <td>${record.month} ${record.year}</td>
+          <td class="date-cell">${record.date}</td>
+          <td class="month-cell">${record.month} ${record.year}</td>
           ${modelCells}
-          <td><strong>${numberFormat(record.total)}</strong></td>
-          <td>${numberFormat(record.target)}</td>
-          <td class="${lossClass}">${numberFormat(record.lossProfit)}</td>
-          <td>${record.remarks || "-"}</td>
+          <td class="total-cell"><strong>${numberFormat(record.total)}</strong></td>
+          <td class="target-cell">${numberFormat(record.target)}</td>
+          <td class="variance-cell ${lossClass}">${numberFormat(record.lossProfit)}</td>
+          <td class="remarks-cell">${record.remarks || "-"}</td>
         </tr>
       `;
     })
