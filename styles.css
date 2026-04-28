@@ -17,6 +17,9 @@
   --shadow: 0 24px 90px rgba(2, 6, 23, 0.18);
   --radius: 1.35rem;
   --font-serif: "Times New Roman", Times, serif;
+  --font-heading:
+    "Plus Jakarta Sans", "Google Sans", "Google Sans Text", "Product Sans", ui-sans-serif,
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 * {
@@ -42,6 +45,27 @@ body.entry-page {
   background:
     radial-gradient(circle at top right, rgba(20, 184, 166, 0.25), transparent 28rem),
     linear-gradient(140deg, #07111f 0%, #0b1d33 34%, #f7fbff 34.2%, #eef4fb 100%);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.brand strong,
+.brand small,
+.brand-mark,
+.nav-links a,
+.eyebrow,
+.status-pill,
+.kpi-card span,
+.kpi-card strong,
+.hero-stats strong,
+.hero-stats span,
+.button-link,
+button {
+  font-family: var(--font-heading);
 }
 
 button,
