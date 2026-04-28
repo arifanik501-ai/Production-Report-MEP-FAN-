@@ -71,7 +71,12 @@ button {
 button,
 input,
 select {
-  font: inherit;
+  font-size: inherit;
+}
+
+input,
+select {
+  font-family: var(--font-serif);
 }
 
 button,
@@ -151,7 +156,7 @@ main {
   border-radius: 1rem;
   box-shadow: 0 18px 40px rgba(20, 184, 166, 0.3);
   display: inline-flex;
-  font-weight: 950;
+  font-weight: 900;
   height: 3.2rem;
   justify-content: center;
   width: 3.2rem;
@@ -337,7 +342,7 @@ label {
   color: var(--muted);
   display: grid;
   font-size: 0.84rem;
-  font-weight: 850;
+  font-weight: 800;
   gap: 0.45rem;
 }
 
@@ -399,7 +404,7 @@ select:focus {
 .kpi-card span {
   color: var(--muted);
   font-size: 0.78rem;
-  font-weight: 950;
+  font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -440,7 +445,7 @@ select:focus {
 .eyebrow {
   color: var(--brand);
   font-size: 0.74rem;
-  font-weight: 950;
+  font-weight: 900;
   letter-spacing: 0.16em;
   margin: 0;
   text-transform: uppercase;
@@ -456,7 +461,7 @@ select:focus {
 .chart-legend {
   color: var(--muted);
   font-size: 0.8rem;
-  font-weight: 850;
+  font-weight: 800;
 }
 
 .chart-legend i,
@@ -492,7 +497,7 @@ select:focus {
 .bar-value {
   color: var(--muted);
   font-size: 0.79rem;
-  font-weight: 850;
+  font-weight: 800;
 }
 
 .bar-track {
@@ -631,8 +636,61 @@ select:focus {
   margin-top: 1rem;
 }
 
+.production-report-panel {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(248, 250, 252, 0.94)),
+    radial-gradient(circle at top left, rgba(20, 184, 166, 0.12), transparent 24rem);
+  border-color: rgba(20, 184, 166, 0.2);
+  overflow: hidden;
+  padding: 0;
+}
+
+.report-heading {
+  align-items: center;
+  background:
+    linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(15, 118, 110, 0.9)),
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.22), transparent 18rem);
+  color: #fff;
+  margin: 0;
+  padding: 1.35rem;
+}
+
+.report-heading h2 {
+  color: #fff;
+  font-size: clamp(1.45rem, 3vw, 2.3rem);
+  letter-spacing: -0.055em;
+}
+
+.report-subtitle {
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.55;
+  margin: 0.35rem 0 0;
+  max-width: 680px;
+}
+
+.record-pill {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  color: #ccfbf1;
+  font-family: var(--font-heading);
+  font-size: 0.82rem;
+  font-weight: 900;
+  margin: 0;
+  padding: 0.72rem 1rem;
+  white-space: nowrap;
+}
+
 .table-wrap {
   overflow-x: auto;
+}
+
+.production-table-wrap {
+  margin: 1.1rem;
+  overflow: auto;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 1.15rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 table {
@@ -649,6 +707,12 @@ td {
   white-space: nowrap;
 }
 
+.production-table-wrap th,
+.production-table-wrap td {
+  border-bottom-color: rgba(148, 163, 184, 0.16);
+  padding: 0.92rem 0.78rem;
+}
+
 th:first-child,
 td:first-child,
 th:nth-child(2),
@@ -661,9 +725,73 @@ td:last-child {
 th {
   color: var(--muted);
   font-size: 0.74rem;
-  font-weight: 950;
+  font-weight: 900;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+.production-table-wrap thead th {
+  background: #eef6ff;
+  color: #334155;
+  font-family: var(--font-heading);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.production-table-wrap tbody tr:nth-child(even) {
+  background: rgba(248, 250, 252, 0.74);
+}
+
+.production-table-wrap tbody tr:hover {
+  background: #ecfeff;
+}
+
+.date-cell,
+.month-cell,
+.total-cell,
+.target-cell,
+.variance-cell {
+  font-family: var(--font-heading);
+}
+
+.date-cell {
+  color: #0f766e;
+  font-weight: 900;
+}
+
+.month-cell {
+  color: #475569;
+  font-weight: 800;
+}
+
+.model-qty {
+  color: #334155;
+}
+
+.total-cell strong {
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.14), rgba(59, 130, 246, 0.12));
+  border-radius: 999px;
+  color: #0f172a;
+  display: inline-block;
+  min-width: 4.5rem;
+  padding: 0.35rem 0.62rem;
+}
+
+.target-cell {
+  color: #1d4ed8;
+  font-weight: 800;
+}
+
+.variance-cell {
+  font-weight: 900;
+}
+
+.remarks-cell {
+  color: #475569;
+  max-width: 18rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 tbody tr:hover {
