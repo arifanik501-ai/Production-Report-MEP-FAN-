@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MEP FAN Production Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div>
+        <p class="eyebrow" id="reportProduct">Production report</p>
+        <h1 id="reportTitle">MEP FAN Production Dashboard</h1>
+        <p class="hero-copy">
+          Interactive analysis from the supplied Excel workbook, with daily entry capture,
+          model-wise production analysis, targets, shortages, remarks, and month filters.
+        </p>
+      </div>
+      <div class="hero-actions">
+        <button id="printDashboard" type="button">Print dashboard</button>
+        <button id="exportData" type="button" class="secondary">Export current data</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="controls panel">
+        <label>
+          Year
+          <select id="yearFilter"></select>
+        </label>
+        <label>
+          Month
+          <select id="monthFilter"></select>
+        </label>
+        <label>
+          Search remarks / date
+          <input id="searchFilter" type="search" placeholder="Search daily entries" />
+        </label>
+        <div class="source-card">
+          <span id="sourceRows">0 rows</span>
+          <small>Excel rows analyzed</small>
+        </div>
+      </section>
+
+      <section class="kpi-grid" aria-label="Production key metrics">
+        <article class="kpi-card">
+          <span>Total Production</span>
+          <strong id="totalProduction">0</strong>
+          <small id="activeDays">0 active days</small>
+        </article>
+        <article class="kpi-card">
+          <span>Total Target</span>
+          <strong id="totalTarget">0</strong>
+          <small id="achievementRate">0% achieved</small>
+        </article>
+        <article class="kpi-card">
+          <span>Need / Shortage</span>
+          <strong id="shortageTotal">0</strong>
+          <small>target minus production</small>
+        </article>
+        <article class="kpi-card">
+          <span>Loss / Profit</span>
+          <strong id="lossProfit">0</strong>
+          <small id="performanceLabel">balanced</small>
+        </article>
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="panel wide">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Daily trend</p>
+              <h2>Production vs target</h2>
+            </div>
+          </div>
+          <div id="trendChart" class="bar-chart" aria-label="Daily production chart"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Model analysis</p>
+              <h2>Production by model</h2>
+            </div>
+          </div>
+          <div id="modelChart" class="model-chart"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Excel summary</p>
+              <h2>Workbook findings</h2>
+            </div>
+          </div>
+          <ul id="insightList" class="insight-list"></ul>
+        </article>
+      </section>
+
+      <section class="panel entry-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Entry sheet</p>
+            <h2>Add daily production</h2>
+          </div>
+          <p class="helper">New entries update this dashboard in your browser and can be exported.</p>
+        </div>
+        <form id="entryForm" class="entry-form">
+          <label>
+            Date
+            <input id="entryDate" type="date" required />
+          </label>
+          <label>
+            Target
+            <input id="entryTarget" type="number" min="0" step="1" value="1600" required />
+          </label>
+          <label>
+            Remarks
+            <input id="entryRemarks" type="text" placeholder="Optional note" />
+          </label>
+          <div id="modelInputs" class="model-inputs"></div>
+          <button type="submit">Add entry</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Daily records</p>
+            <h2>Production entry sheet</h2>
+          </div>
+          <p class="helper" id="recordCount">0 records</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr id="entryTableHead"></tr>
+            </thead>
+            <tbody id="entryTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
