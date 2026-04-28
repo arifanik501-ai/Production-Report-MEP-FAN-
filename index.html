@@ -4,6 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MEP FAN Production Command Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body class="dashboard-page">
@@ -26,21 +33,21 @@
         <p class="eyebrow" id="reportProduct">Production report</p>
         <h1 id="reportTitle">MEP FAN Production Command Center</h1>
         <p class="hero-copy">
-          A bigger, cleaner dashboard for the full Excel production report with live
-          scorecards, target tracking, model ranking, daily trends, and filtered entry history.
+          A clean production dashboard with live scorecards, target tracking, model
+          ranking, daily trends, and filtered entry history.
         </p>
-        <div class="hero-stats" aria-label="Workbook summary">
+        <div class="hero-stats" aria-label="Production summary">
           <div>
             <strong id="sourceRows">0</strong>
-            <span>entries analyzed</span>
-          </div>
-          <div>
-            <strong id="formulaCount">0</strong>
-            <span>formulas read</span>
+            <span>production entries</span>
           </div>
           <div>
             <strong id="savedCount">0</strong>
             <span>browser entries</span>
+          </div>
+          <div>
+            <strong id="modelCount">0</strong>
+            <span>fan models</span>
           </div>
         </div>
       </div>
@@ -111,7 +118,7 @@
         <article class="panel">
           <div class="panel-heading">
             <div>
-              <p class="eyebrow">Model analysis</p>
+              <p class="eyebrow">Model overview</p>
               <h2>Production ranking</h2>
             </div>
           </div>
@@ -121,8 +128,8 @@
         <article class="panel insight-panel">
           <div class="panel-heading">
             <div>
-              <p class="eyebrow">Excel summary</p>
-              <h2>Workbook findings</h2>
+              <p class="eyebrow">Production summary</p>
+              <h2>Key findings</h2>
             </div>
           </div>
           <ul id="insightList" class="insight-list"></ul>

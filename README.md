@@ -1,14 +1,13 @@
 # Production-Report-MEP-FAN-
 
-A static production reporting dashboard for MEP FAN LTD, built from the supplied
-`Book1.xlsx` workbook.
+A static production reporting dashboard for MEP FAN LTD.
 
 ## What it includes
 
 - Dashboard KPI cards for total production, target, shortage, and loss/profit.
-- Year/month/search filters for the analyzed Excel rows.
+- Year/month/search filters for production entries.
 - Daily production vs target trend chart.
-- Model-wise production analysis for each ceiling fan body model.
+- Model-wise production overview for each ceiling fan body model.
 - Separate production entry page for adding new daily production records in the browser.
 - CSV export and print actions.
 

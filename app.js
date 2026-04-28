@@ -35,7 +35,7 @@ const elements = {
   trendChart: document.querySelector("#trendChart"),
   modelChart: document.querySelector("#modelChart"),
   insightList: document.querySelector("#insightList"),
-  formulaCount: document.querySelector("#formulaCount"),
+  modelCount: document.querySelector("#modelCount"),
   savedCount: document.querySelector("#savedCount"),
   modelInputs: document.querySelector("#modelInputs"),
   entryForm: document.querySelector("#entryForm"),
@@ -91,6 +91,13 @@ function percent(value) {
 function getMonth(dateValue) {
   const date = new Date(`${dateValue}T00:00:00`);
   return monthOrder[date.getMonth()];
+}
+
+function getLocalDateInputValue(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function getCurrentFilters() {
@@ -281,13 +288,12 @@ function renderInsights(filteredRecords) {
   const filteredTarget = sum(filteredRecords, "target");
 
   const insights = [
-    `Workbook contains ${numberFormat(reportData.workbook.sheetRows)} rows and ${numberFormat(reportData.workbook.formulaCount)} formulas.`,
     `April 2026 production is ${numberFormat(productionSummary.total)} against a monthly target of ${numberFormat(monthlyTarget.total)}.`,
-    `${topModel.model} is the highest-producing model in the source report with ${numberFormat(topModel.total)} units.`,
+    `${topModel.model} is the highest-producing model with ${numberFormat(topModel.total)} units.`,
     `Current filter shows ${numberFormat(filteredProduction)} production units and ${numberFormat(Math.max(filteredTarget - filteredProduction, 0))} remaining need.`,
     remarks.length
       ? `Remarks found: ${remarks.join("; ")}.`
-      : "No remarks were found in the selected source records.",
+      : "No remarks were found in the selected production records.",
   ];
 
   elements.insightList.innerHTML = insights.map((insight) => `<li>${insight}</li>`).join("");
@@ -499,7 +505,7 @@ function bootEntry() {
   renderCustomEntries();
   updateEntryPreview();
 
-  elements.entryDate.value = new Date().toISOString().slice(0, 10);
+  elements.entryDate.value = getLocalDateInputValue();
   elements.entryForm.addEventListener("submit", addEntry);
   elements.modelInputs.addEventListener("input", updateEntryPreview);
   elements.clearCustomEntries.addEventListener("click", clearCustomEntries);
@@ -515,8 +521,8 @@ function boot() {
   if (elements.sourceRows) {
     elements.sourceRows.textContent = `${numberFormat(reportData.aggregate.records)} entries`;
   }
-  if (elements.formulaCount) {
-    elements.formulaCount.textContent = numberFormat(reportData.workbook.formulaCount);
+  if (elements.modelCount) {
+    elements.modelCount.textContent = numberFormat(modelHeaders.length);
   }
 
   if (document.body.classList.contains("dashboard-page")) {
