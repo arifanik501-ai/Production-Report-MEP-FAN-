@@ -1,5 +1,6 @@
 const reportData = window.PRODUCTION_REPORT_DATA;
 const storageKey = "mepFanProductionEntries";
+const targetStorageKey = "mepFanMonthlyTargets";
 const monthOrder = [
   "January",
   "February",
@@ -36,10 +37,13 @@ const elements = {
   insightList: document.querySelector("#insightList"),
   modelInputs: document.querySelector("#modelInputs"),
   entryForm: document.querySelector("#entryForm"),
+  editingRow: document.querySelector("#editingRow"),
   entryDate: document.querySelector("#entryDate"),
   entryTarget: document.querySelector("#entryTarget"),
   entryRemarks: document.querySelector("#entryRemarks"),
   entryStatus: document.querySelector("#entryStatus"),
+  saveEntryButton: document.querySelector("#saveEntryButton"),
+  cancelEditEntry: document.querySelector("#cancelEditEntry"),
   entryPreviewTotal: document.querySelector("#entryPreviewTotal"),
   entryTableHead: document.querySelector("#entryTableHead"),
   entryTableBody: document.querySelector("#entryTableBody"),
@@ -49,6 +53,14 @@ const elements = {
   clearCustomEntries: document.querySelector("#clearCustomEntries"),
   customTableHead: document.querySelector("#customTableHead"),
   customTableBody: document.querySelector("#customTableBody"),
+  targetForm: document.querySelector("#targetForm"),
+  targetMonth: document.querySelector("#targetMonth"),
+  overallTarget: document.querySelector("#overallTarget"),
+  targetModelInputs: document.querySelector("#targetModelInputs"),
+  targetStatus: document.querySelector("#targetStatus"),
+  targetPreviewTotal: document.querySelector("#targetPreviewTotal"),
+  monthlyOverallTarget: document.querySelector("#monthlyOverallTarget"),
+  monthlyModelTarget: document.querySelector("#monthlyModelTarget"),
   printDashboard: document.querySelector("#printDashboard"),
   exportData: document.querySelector("#exportData"),
 };
@@ -68,6 +80,25 @@ function saveEntries() {
   } catch {
     if (elements.entryStatus) {
       elements.entryStatus.textContent = "Entry saved for this page, but browser storage is blocked.";
+    }
+  }
+}
+
+function loadMonthlyTargets() {
+  try {
+    const targets = JSON.parse(localStorage.getItem(targetStorageKey) || "{}");
+    return targets && typeof targets === "object" && !Array.isArray(targets) ? targets : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveMonthlyTargets(targets) {
+  try {
+    localStorage.setItem(targetStorageKey, JSON.stringify(targets));
+  } catch {
+    if (elements.targetStatus) {
+      elements.targetStatus.textContent = "Target saved for this page, but browser storage is blocked.";
     }
   }
 }
@@ -95,6 +126,16 @@ function getLocalDateInputValue(date = new Date()) {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+function getLocalMonthInputValue(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${year}-${month}`;
+}
+
+function getMonthKey(dateValue) {
+  return dateValue ? dateValue.slice(0, 7) : getLocalMonthInputValue();
 }
 
 function getCurrentFilters() {
@@ -163,6 +204,23 @@ function renderModelInputs() {
         <label>
           ${model}
           <input type="number" min="0" step="1" value="0" data-model="${model}" />
+        </label>
+      `,
+    )
+    .join("");
+}
+
+function renderTargetModelInputs() {
+  if (!elements.targetModelInputs) {
+    return;
+  }
+
+  elements.targetModelInputs.innerHTML = modelHeaders
+    .map(
+      (model) => `
+        <label>
+          ${model} target
+          <input type="number" min="0" step="1" value="0" data-target-model="${model}" />
         </label>
       `,
     )
@@ -346,6 +404,7 @@ function renderDashboard() {
 function addEntry(event) {
   event.preventDefault();
   const date = elements.entryDate.value;
+  const editingRow = Number(elements.editingRow.value) || null;
   const modelValues = {};
   let total = 0;
 
@@ -357,7 +416,7 @@ function addEntry(event) {
 
   const target = Number(elements.entryTarget.value) || 0;
   const entry = {
-    row: Date.now(),
+    row: editingRow || Date.now(),
     date,
     year: new Date(`${date}T00:00:00`).getFullYear(),
     month: getMonth(date),
@@ -368,27 +427,72 @@ function addEntry(event) {
     remarks: elements.entryRemarks.value.trim(),
   };
 
-  records.push(entry);
+  if (editingRow) {
+    records = records.map((record) => (record.row === editingRow ? entry : record));
+  } else {
+    records.push(entry);
+  }
   saveEntries();
   populateFilters();
   if (elements.yearFilter && elements.monthFilter) {
     elements.yearFilter.value = String(entry.year);
     elements.monthFilter.value = entry.month;
   }
-  elements.entryForm.reset();
-  elements.entryTarget.value = target || 1600;
-  document.querySelectorAll("[data-model]").forEach((input) => {
-    input.value = 0;
-  });
-  if (elements.entryDate) {
-    elements.entryDate.value = date;
-  }
+  resetEntryForm(date, target || 1600);
   if (elements.entryStatus) {
-    elements.entryStatus.textContent = `Saved ${numberFormat(total)} units for ${date}.`;
+    elements.entryStatus.textContent = `${editingRow ? "Updated" : "Saved"} ${numberFormat(total)} units for ${date}.`;
   }
   updateEntryPreview();
   renderCustomEntries();
   renderDashboard();
+}
+
+function resetEntryForm(date = elements.entryDate.value || getLocalDateInputValue(), target = 1600) {
+  if (!elements.entryForm) {
+    return;
+  }
+
+  elements.entryForm.reset();
+  elements.editingRow.value = "";
+  elements.entryDate.value = date;
+  elements.entryTarget.value = target;
+  elements.entryRemarks.value = "";
+  document.querySelectorAll("[data-model]").forEach((input) => {
+    input.value = 0;
+  });
+  if (elements.saveEntryButton) {
+    elements.saveEntryButton.textContent = "Save production entry";
+  }
+  if (elements.cancelEditEntry) {
+    elements.cancelEditEntry.classList.remove("is-visible");
+  }
+  updateEntryPreview();
+}
+
+function editCustomEntry(row) {
+  const record = getCustomRecords().find((customRecord) => customRecord.row === row);
+  if (!record) {
+    return;
+  }
+
+  elements.editingRow.value = record.row;
+  elements.entryDate.value = record.date;
+  elements.entryTarget.value = record.target || 0;
+  elements.entryRemarks.value = record.remarks || "";
+  document.querySelectorAll("[data-model]").forEach((input) => {
+    input.value = record[input.dataset.model] || 0;
+  });
+  if (elements.saveEntryButton) {
+    elements.saveEntryButton.textContent = "Update production entry";
+  }
+  if (elements.cancelEditEntry) {
+    elements.cancelEditEntry.classList.add("is-visible");
+  }
+  if (elements.entryStatus) {
+    elements.entryStatus.textContent = `Editing ${record.date}. Update and save changes.`;
+  }
+  updateEntryPreview();
+  elements.entryForm.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function exportCurrentData() {
@@ -420,7 +524,7 @@ function renderCustomTableHeader() {
     return;
   }
 
-  const headers = ["Date", ...modelHeaders, "Total", "Target", "Loss/Profit", "Remarks"];
+  const headers = ["Date", ...modelHeaders, "Total", "Target", "Loss/Profit", "Remarks", "Edit"];
   elements.customTableHead.innerHTML = headers.map((heading) => `<th>${heading}</th>`).join("");
 }
 
@@ -436,6 +540,76 @@ function updateEntryPreview() {
   elements.entryPreviewTotal.textContent = numberFormat(total);
 }
 
+function updateTargetPreview() {
+  if (!elements.targetPreviewTotal) {
+    return;
+  }
+
+  const total = [...document.querySelectorAll("[data-target-model]")].reduce(
+    (targetTotal, input) => targetTotal + (Number(input.value) || 0),
+    0,
+  );
+  elements.targetPreviewTotal.textContent = numberFormat(total);
+}
+
+function fillTargetForm(monthKey) {
+  if (!elements.targetForm || !monthKey) {
+    return;
+  }
+
+  const monthlyTargets = loadMonthlyTargets();
+  const target = monthlyTargets[monthKey] || { overall: 0, models: {} };
+  elements.targetMonth.value = monthKey;
+  elements.overallTarget.value = target.overall || 0;
+  document.querySelectorAll("[data-target-model]").forEach((input) => {
+    input.value = target.models?.[input.dataset.targetModel] || 0;
+  });
+  updateTargetPreview();
+}
+
+function renderTargetSummary() {
+  if (!elements.monthlyOverallTarget && !elements.monthlyModelTarget) {
+    return;
+  }
+
+  const monthKey = elements.targetMonth?.value || getLocalMonthInputValue();
+  const target = loadMonthlyTargets()[monthKey] || { overall: 0, models: {} };
+  const modelTotal = modelHeaders.reduce((total, model) => total + (Number(target.models?.[model]) || 0), 0);
+
+  if (elements.monthlyOverallTarget) {
+    elements.monthlyOverallTarget.textContent = numberFormat(target.overall);
+  }
+  if (elements.monthlyModelTarget) {
+    elements.monthlyModelTarget.textContent = numberFormat(modelTotal);
+  }
+}
+
+function saveTarget(event) {
+  event.preventDefault();
+  const monthKey = elements.targetMonth.value;
+  const models = {};
+  let modelTotal = 0;
+
+  document.querySelectorAll("[data-target-model]").forEach((input) => {
+    const value = Number(input.value) || 0;
+    models[input.dataset.targetModel] = value;
+    modelTotal += value;
+  });
+
+  const monthlyTargets = loadMonthlyTargets();
+  monthlyTargets[monthKey] = {
+    overall: Number(elements.overallTarget.value) || 0,
+    models,
+    modelTotal,
+  };
+  saveMonthlyTargets(monthlyTargets);
+  if (elements.targetStatus) {
+    elements.targetStatus.textContent = `Saved target for ${monthKey}.`;
+  }
+  updateTargetPreview();
+  renderTargetSummary();
+}
+
 function renderCustomEntries() {
   const customRecords = getCustomRecords();
   if (elements.customEntryCount) {
@@ -444,12 +618,13 @@ function renderCustomEntries() {
   if (elements.customProductionTotal) {
     elements.customProductionTotal.textContent = numberFormat(sum(customRecords, "total"));
   }
+  renderTargetSummary();
   if (!elements.customTableBody) {
     return;
   }
 
   if (!customRecords.length) {
-    elements.customTableBody.innerHTML = `<tr><td colspan="${modelHeaders.length + 5}">No browser entries yet.</td></tr>`;
+    elements.customTableBody.innerHTML = `<tr><td colspan="${modelHeaders.length + 6}">No browser entries yet.</td></tr>`;
     return;
   }
 
@@ -467,6 +642,7 @@ function renderCustomEntries() {
           <td>${numberFormat(record.target)}</td>
           <td class="${lossClass}">${numberFormat(record.lossProfit)}</td>
           <td>${record.remarks || "-"}</td>
+          <td><button type="button" class="button-link compact muted edit-entry" data-edit-row="${record.row}">Edit</button></td>
         </tr>
       `;
     })
@@ -476,10 +652,20 @@ function renderCustomEntries() {
 function clearCustomEntries() {
   records = [...reportData.records];
   saveEntries();
+  resetEntryForm();
   if (elements.entryStatus) {
     elements.entryStatus.textContent = "Browser entries cleared.";
   }
   renderCustomEntries();
+  renderDashboard();
+}
+
+function handleCustomTableClick(event) {
+  const editButton = event.target.closest("[data-edit-row]");
+  if (!editButton) {
+    return;
+  }
+  editCustomEntry(Number(editButton.dataset.editRow));
 }
 
 function bootDashboard() {
@@ -497,13 +683,30 @@ function bootDashboard() {
 
 function bootEntry() {
   renderModelInputs();
+  renderTargetModelInputs();
   renderCustomTableHeader();
   renderCustomEntries();
   updateEntryPreview();
+  updateTargetPreview();
 
   elements.entryDate.value = getLocalDateInputValue();
+  const currentMonth = getLocalMonthInputValue();
+  elements.targetMonth.value = currentMonth;
+  fillTargetForm(currentMonth);
+  renderTargetSummary();
   elements.entryForm.addEventListener("submit", addEntry);
   elements.modelInputs.addEventListener("input", updateEntryPreview);
+  elements.targetForm.addEventListener("submit", saveTarget);
+  elements.targetForm.addEventListener("input", updateTargetPreview);
+  elements.targetMonth.addEventListener("change", () => {
+    fillTargetForm(elements.targetMonth.value);
+    renderTargetSummary();
+  });
+  elements.customTableBody.addEventListener("click", handleCustomTableClick);
+  elements.cancelEditEntry.addEventListener("click", () => {
+    resetEntryForm();
+    elements.entryStatus.textContent = "Edit cancelled. Ready for new production entry.";
+  });
   elements.clearCustomEntries.addEventListener("click", clearCustomEntries);
 }
 
