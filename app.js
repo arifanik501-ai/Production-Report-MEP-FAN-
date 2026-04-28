@@ -1,6 +1,7 @@
 const reportData = window.PRODUCTION_REPORT_DATA;
 const storageKey = "mepFanProductionEntries";
 const targetStorageKey = "mepFanMonthlyTargets";
+const recentEntryMonth = "April";
 const monthOrder = [
   "January",
   "February",
@@ -17,6 +18,7 @@ const monthOrder = [
 ];
 
 const modelHeaders = reportData.workbook.modelHeaders;
+const originalRecordRows = new Set(reportData.records.map((record) => record.row));
 let records = [...reportData.records, ...loadSavedEntries()];
 
 const elements = {
@@ -104,8 +106,15 @@ function saveMonthlyTargets(targets) {
 }
 
 function getCustomRecords() {
-  const originalRows = new Set(reportData.records.map((record) => record.row));
-  return records.filter((record) => !originalRows.has(record.row));
+  return records.filter((record) => !originalRecordRows.has(record.row));
+}
+
+function isCustomRecord(record) {
+  return !originalRecordRows.has(record.row);
+}
+
+function getRecentEntryRecords() {
+  return records.filter((record) => record.month === recentEntryMonth);
 }
 
 function numberFormat(value) {
@@ -534,7 +543,7 @@ function renderCustomTableHeader() {
     return;
   }
 
-  const headers = ["Date", ...modelHeaders, "Total", "Target", "Profit/Loss", "Remarks", "Edit"];
+  const headers = ["Date", "Source", ...modelHeaders, "Total", "Target", "Profit/Loss", "Remarks", "Edit"];
   elements.customTableHead.innerHTML = headers.map((heading) => `<th>${heading}</th>`).join("");
 }
 
@@ -622,37 +631,44 @@ function saveTarget(event) {
 
 function renderCustomEntries() {
   const customRecords = getCustomRecords();
+  const recentRecords = getRecentEntryRecords();
   if (elements.customEntryCount) {
-    elements.customEntryCount.textContent = numberFormat(customRecords.length);
+    elements.customEntryCount.textContent = numberFormat(recentRecords.length);
   }
   if (elements.customProductionTotal) {
-    elements.customProductionTotal.textContent = numberFormat(sum(customRecords, "total"));
+    elements.customProductionTotal.textContent = numberFormat(sum(recentRecords, "total"));
   }
   renderTargetSummary();
   if (!elements.customTableBody) {
     return;
   }
 
-  if (!customRecords.length) {
-    elements.customTableBody.innerHTML = `<tr><td colspan="${modelHeaders.length + 6}">No browser entries yet.</td></tr>`;
+  if (!recentRecords.length) {
+    elements.customTableBody.innerHTML = `<tr><td colspan="${modelHeaders.length + 7}">No April production data yet.</td></tr>`;
     return;
   }
 
-  elements.customTableBody.innerHTML = customRecords
+  elements.customTableBody.innerHTML = recentRecords
     .slice()
     .reverse()
     .map((record) => {
       const modelCells = modelHeaders.map((model) => `<td>${numberFormat(record[model])}</td>`).join("");
       const lossClass = getProfitLossClass(record.lossProfit);
+      const customRecord = isCustomRecord(record);
+      const source = customRecord ? "Browser" : "Imported";
+      const editButton = customRecord
+        ? `<button type="button" class="button-link compact muted edit-entry" data-edit-row="${record.row}">Edit</button>`
+        : `<span class="locked-entry">Fixed</span>`;
       return `
         <tr>
           <td>${record.date}</td>
+          <td><span class="source-pill ${customRecord ? "browser-entry" : "imported-entry"}">${source}</span></td>
           ${modelCells}
           <td><strong>${numberFormat(record.total)}</strong></td>
           <td>${numberFormat(record.target)}</td>
           <td class="${lossClass}">${numberFormat(record.lossProfit)}</td>
           <td>${record.remarks || "-"}</td>
-          <td><button type="button" class="button-link compact muted edit-entry" data-edit-row="${record.row}">Edit</button></td>
+          <td>${editButton}</td>
         </tr>
       `;
     })

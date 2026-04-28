@@ -897,6 +897,29 @@ select:focus {
   white-space: nowrap;
 }
 
+.source-pill,
+.locked-entry {
+  border-radius: 999px;
+  display: inline-block;
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  padding: 0.28rem 0.58rem;
+  text-transform: uppercase;
+}
+
+.source-pill.browser-entry {
+  background: rgba(20, 184, 166, 0.14);
+  color: #0f766e;
+}
+
+.source-pill.imported-entry,
+.locked-entry {
+  background: rgba(100, 116, 139, 0.12);
+  color: #64748b;
+}
+
 .table-wrap {
   overflow-x: auto;
 }
