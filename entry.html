@@ -50,6 +50,7 @@
           <p class="helper" id="entryStatus">Ready for new production entry.</p>
         </div>
         <form id="entryForm" class="entry-form">
+          <input id="editingRow" type="hidden" />
           <label>
             Date
             <input id="entryDate" type="date" required />
@@ -68,7 +69,37 @@
             <strong id="entryPreviewTotal">0</strong>
             <small>sum of all model quantities</small>
           </div>
-          <button type="submit">Save production entry</button>
+          <div class="entry-actions">
+            <button id="saveEntryButton" type="submit">Save production entry</button>
+            <button id="cancelEditEntry" type="button" class="button-link muted">Cancel edit</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel target-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Monthly target</p>
+            <h2>Overall and model-wise target</h2>
+          </div>
+          <p class="helper" id="targetStatus">Set monthly target for planning.</p>
+        </div>
+        <form id="targetForm" class="target-form">
+          <label>
+            Target month
+            <input id="targetMonth" type="month" required />
+          </label>
+          <label>
+            Overall monthly target
+            <input id="overallTarget" type="number" min="0" step="1" value="0" required />
+          </label>
+          <div id="targetModelInputs" class="model-inputs target-model-inputs"></div>
+          <div class="entry-total-card">
+            <span>Model target total</span>
+            <strong id="targetPreviewTotal">0</strong>
+            <small>sum of model-wise monthly targets</small>
+          </div>
+          <button type="submit">Save monthly target</button>
         </form>
       </section>
 
@@ -82,6 +113,14 @@
         <div class="side-metric">
           <span>Custom production</span>
           <strong id="customProductionTotal">0</strong>
+        </div>
+        <div class="side-metric">
+          <span>Monthly overall target</span>
+          <strong id="monthlyOverallTarget">0</strong>
+        </div>
+        <div class="side-metric">
+          <span>Model target total</span>
+          <strong id="monthlyModelTarget">0</strong>
         </div>
         <button id="clearCustomEntries" type="button" class="button-link muted danger">
           Clear browser entries

@@ -752,6 +752,7 @@ select:focus {
 }
 
 .entry-panel,
+.target-panel,
 .entry-history {
   grid-column: 1;
 }
@@ -769,9 +770,38 @@ select:focus {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.target-form {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .model-inputs {
   grid-column: 1 / -1;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.target-model-inputs {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.entry-actions {
+  align-self: end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.entry-actions button {
+  flex: 1 1 12rem;
+}
+
+#cancelEditEntry {
+  display: none;
+}
+
+#cancelEditEntry.is-visible {
+  display: inline-flex;
 }
 
 .entry-total-card,
@@ -803,7 +833,8 @@ select:focus {
   letter-spacing: -0.05em;
 }
 
-.entry-form button {
+.entry-form button,
+.target-form button {
   align-self: end;
 }
 
@@ -1007,12 +1038,14 @@ tbody tr:hover {
   .dashboard-grid,
   .entry-layout,
   .entry-form,
+  .target-form,
   .model-inputs {
     grid-template-columns: 1fr 1fr;
   }
 
   .wide,
   .entry-panel,
+  .target-panel,
   .entry-history,
   .entry-side {
     grid-column: 1 / -1;
@@ -1047,6 +1080,7 @@ tbody tr:hover {
   .dashboard-grid,
   .entry-layout,
   .entry-form,
+  .target-form,
   .model-inputs,
   .panel-heading {
     grid-template-columns: 1fr;
