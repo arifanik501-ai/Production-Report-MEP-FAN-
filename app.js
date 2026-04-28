@@ -35,14 +35,23 @@ const elements = {
   trendChart: document.querySelector("#trendChart"),
   modelChart: document.querySelector("#modelChart"),
   insightList: document.querySelector("#insightList"),
+  formulaCount: document.querySelector("#formulaCount"),
+  savedCount: document.querySelector("#savedCount"),
   modelInputs: document.querySelector("#modelInputs"),
   entryForm: document.querySelector("#entryForm"),
   entryDate: document.querySelector("#entryDate"),
   entryTarget: document.querySelector("#entryTarget"),
   entryRemarks: document.querySelector("#entryRemarks"),
+  entryStatus: document.querySelector("#entryStatus"),
+  entryPreviewTotal: document.querySelector("#entryPreviewTotal"),
   entryTableHead: document.querySelector("#entryTableHead"),
   entryTableBody: document.querySelector("#entryTableBody"),
   recordCount: document.querySelector("#recordCount"),
+  customEntryCount: document.querySelector("#customEntryCount"),
+  customProductionTotal: document.querySelector("#customProductionTotal"),
+  clearCustomEntries: document.querySelector("#clearCustomEntries"),
+  customTableHead: document.querySelector("#customTableHead"),
+  customTableBody: document.querySelector("#customTableBody"),
   printDashboard: document.querySelector("#printDashboard"),
   exportData: document.querySelector("#exportData"),
 };
@@ -56,9 +65,12 @@ function loadSavedEntries() {
 }
 
 function saveEntries() {
+  localStorage.setItem(storageKey, JSON.stringify(getCustomRecords()));
+}
+
+function getCustomRecords() {
   const originalRows = new Set(reportData.records.map((record) => record.row));
-  const customRows = records.filter((record) => !originalRows.has(record.row));
-  localStorage.setItem(storageKey, JSON.stringify(customRows));
+  return records.filter((record) => !originalRows.has(record.row));
 }
 
 function numberFormat(value) {
@@ -76,9 +88,9 @@ function getMonth(dateValue) {
 
 function getCurrentFilters() {
   return {
-    year: elements.yearFilter.value,
-    month: elements.monthFilter.value,
-    search: elements.searchFilter.value.trim().toLowerCase(),
+    year: elements.yearFilter?.value || "all",
+    month: elements.monthFilter?.value || "all",
+    search: elements.searchFilter?.value.trim().toLowerCase() || "",
   };
 }
 
@@ -97,6 +109,12 @@ function sum(recordsToSum, key) {
 }
 
 function populateFilters() {
+  if (!elements.yearFilter || !elements.monthFilter) {
+    return;
+  }
+
+  const selectedYear = elements.yearFilter.value;
+  const selectedMonth = elements.monthFilter.value;
   const years = [...new Set(records.map((record) => record.year))].sort();
   elements.yearFilter.innerHTML = [
     `<option value="all">All years</option>`,
@@ -111,15 +129,23 @@ function populateFilters() {
     ...months.map((month) => `<option value="${month}">${month}</option>`),
   ].join("");
 
-  if (years.includes(2026)) {
+  if (selectedYear && [...years.map(String), "all"].includes(selectedYear)) {
+    elements.yearFilter.value = selectedYear;
+  } else if (years.includes(2026)) {
     elements.yearFilter.value = "2026";
   }
-  if (months.includes("April")) {
+  if (selectedMonth && [...months, "all"].includes(selectedMonth)) {
+    elements.monthFilter.value = selectedMonth;
+  } else if (months.includes("April")) {
     elements.monthFilter.value = "April";
   }
 }
 
 function renderModelInputs() {
+  if (!elements.modelInputs) {
+    return;
+  }
+
   elements.modelInputs.innerHTML = modelHeaders
     .map(
       (model) => `
@@ -133,6 +159,10 @@ function renderModelInputs() {
 }
 
 function renderTableHeader() {
+  if (!elements.entryTableHead) {
+    return;
+  }
+
   const headers = [
     "Date",
     "Month",
@@ -146,6 +176,10 @@ function renderTableHeader() {
 }
 
 function renderKpis(filteredRecords) {
+  if (!elements.totalProduction) {
+    return;
+  }
+
   const production = sum(filteredRecords, "total");
   const target = sum(filteredRecords, "target");
   const lossProfit = sum(filteredRecords, "lossProfit");
@@ -165,6 +199,10 @@ function renderKpis(filteredRecords) {
 }
 
 function renderTrendChart(filteredRecords) {
+  if (!elements.trendChart) {
+    return;
+  }
+
   const visible = filteredRecords
     .filter((record) => record.total || record.target)
     .slice(-35);
@@ -194,6 +232,10 @@ function renderTrendChart(filteredRecords) {
 }
 
 function renderModelChart(filteredRecords) {
+  if (!elements.modelChart) {
+    return;
+  }
+
   const totals = modelHeaders.map((model) => ({
     model,
     total: sum(filteredRecords, model),
@@ -218,6 +260,10 @@ function renderModelChart(filteredRecords) {
 }
 
 function renderInsights(filteredRecords) {
+  if (!elements.insightList) {
+    return;
+  }
+
   const productionSummary = reportData.workbook.summary.production;
   const monthlyTarget = reportData.workbook.summary.monthlyTarget;
   const topModel = modelHeaders
@@ -241,6 +287,10 @@ function renderInsights(filteredRecords) {
 }
 
 function renderTable(filteredRecords) {
+  if (!elements.entryTableBody || !elements.recordCount) {
+    return;
+  }
+
   const rows = filteredRecords
     .filter((record) => record.total || record.target || record.remarks)
     .slice(-120)
@@ -309,13 +359,23 @@ function addEntry(event) {
   records.push(entry);
   saveEntries();
   populateFilters();
-  elements.yearFilter.value = String(entry.year);
-  elements.monthFilter.value = entry.month;
+  if (elements.yearFilter && elements.monthFilter) {
+    elements.yearFilter.value = String(entry.year);
+    elements.monthFilter.value = entry.month;
+  }
   elements.entryForm.reset();
   elements.entryTarget.value = target || 1600;
   document.querySelectorAll("[data-model]").forEach((input) => {
     input.value = 0;
   });
+  if (elements.entryDate) {
+    elements.entryDate.value = date;
+  }
+  if (elements.entryStatus) {
+    elements.entryStatus.textContent = `Saved ${numberFormat(total)} units for ${date}.`;
+  }
+  updateEntryPreview();
+  renderCustomEntries();
   renderDashboard();
 }
 
@@ -343,23 +403,121 @@ function exportCurrentData() {
   URL.revokeObjectURL(url);
 }
 
-function boot() {
-  elements.reportTitle.textContent = reportData.workbook.company;
-  elements.reportProduct.textContent = `${reportData.workbook.reportTitle} • ${reportData.workbook.product}`;
-  elements.sourceRows.textContent = `${numberFormat(reportData.aggregate.records)} entries`;
-  elements.entryDate.value = reportData.records.find((record) => record.date)?.date || "";
+function renderCustomTableHeader() {
+  if (!elements.customTableHead) {
+    return;
+  }
 
+  const headers = ["Date", ...modelHeaders, "Total", "Target", "Loss/Profit", "Remarks"];
+  elements.customTableHead.innerHTML = headers.map((heading) => `<th>${heading}</th>`).join("");
+}
+
+function updateEntryPreview() {
+  if (!elements.entryPreviewTotal) {
+    return;
+  }
+
+  const total = [...document.querySelectorAll("[data-model]")].reduce(
+    (entryTotal, input) => entryTotal + (Number(input.value) || 0),
+    0,
+  );
+  elements.entryPreviewTotal.textContent = numberFormat(total);
+}
+
+function renderCustomEntries() {
+  const customRecords = getCustomRecords();
+  if (elements.savedCount) {
+    elements.savedCount.textContent = numberFormat(customRecords.length);
+  }
+  if (elements.customEntryCount) {
+    elements.customEntryCount.textContent = numberFormat(customRecords.length);
+  }
+  if (elements.customProductionTotal) {
+    elements.customProductionTotal.textContent = numberFormat(sum(customRecords, "total"));
+  }
+  if (!elements.customTableBody) {
+    return;
+  }
+
+  if (!customRecords.length) {
+    elements.customTableBody.innerHTML = `<tr><td colspan="${modelHeaders.length + 5}">No browser entries yet.</td></tr>`;
+    return;
+  }
+
+  elements.customTableBody.innerHTML = customRecords
+    .slice()
+    .reverse()
+    .map((record) => {
+      const modelCells = modelHeaders.map((model) => `<td>${numberFormat(record[model])}</td>`).join("");
+      const lossClass = record.lossProfit < 0 ? "negative" : "positive";
+      return `
+        <tr>
+          <td>${record.date}</td>
+          ${modelCells}
+          <td><strong>${numberFormat(record.total)}</strong></td>
+          <td>${numberFormat(record.target)}</td>
+          <td class="${lossClass}">${numberFormat(record.lossProfit)}</td>
+          <td>${record.remarks || "-"}</td>
+        </tr>
+      `;
+    })
+    .join("");
+}
+
+function clearCustomEntries() {
+  records = [...reportData.records];
+  saveEntries();
+  if (elements.entryStatus) {
+    elements.entryStatus.textContent = "Browser entries cleared.";
+  }
+  renderCustomEntries();
+}
+
+function bootDashboard() {
   populateFilters();
-  renderModelInputs();
   renderTableHeader();
+  renderCustomEntries();
   renderDashboard();
 
   elements.yearFilter.addEventListener("change", renderDashboard);
   elements.monthFilter.addEventListener("change", renderDashboard);
   elements.searchFilter.addEventListener("input", renderDashboard);
-  elements.entryForm.addEventListener("submit", addEntry);
   elements.printDashboard.addEventListener("click", () => window.print());
   elements.exportData.addEventListener("click", exportCurrentData);
+}
+
+function bootEntry() {
+  renderModelInputs();
+  renderCustomTableHeader();
+  renderCustomEntries();
+  updateEntryPreview();
+
+  elements.entryDate.value = new Date().toISOString().slice(0, 10);
+  elements.entryForm.addEventListener("submit", addEntry);
+  elements.modelInputs.addEventListener("input", updateEntryPreview);
+  elements.clearCustomEntries.addEventListener("click", clearCustomEntries);
+}
+
+function boot() {
+  if (elements.reportTitle) {
+    elements.reportTitle.textContent = reportData.workbook.company;
+  }
+  if (elements.reportProduct) {
+    elements.reportProduct.textContent = `${reportData.workbook.reportTitle} • ${reportData.workbook.product}`;
+  }
+  if (elements.sourceRows) {
+    elements.sourceRows.textContent = `${numberFormat(reportData.aggregate.records)} entries`;
+  }
+  if (elements.formulaCount) {
+    elements.formulaCount.textContent = numberFormat(reportData.workbook.formulaCount);
+  }
+
+  if (document.body.classList.contains("dashboard-page")) {
+    bootDashboard();
+  }
+  if (document.body.classList.contains("entry-page")) {
+    bootEntry();
+  }
 }
 
 boot();

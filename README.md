@@ -9,7 +9,7 @@ A static production reporting dashboard for MEP FAN LTD, built from the supplied
 - Year/month/search filters for the analyzed Excel rows.
 - Daily production vs target trend chart.
 - Model-wise production analysis for each ceiling fan body model.
-- Entry sheet for adding new daily production records in the browser.
+- Separate production entry page for adding new daily production records in the browser.
 - CSV export and print actions.
 
 ## Run locally
@@ -21,3 +21,5 @@ python3 -m http.server 8000
 ```
 
 Then open `http://localhost:8000`.
+
+Use `index.html` for the dashboard and `entry.html` for the production entry sheet.

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Production Entry | MEP FAN</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="entry-page">
+    <nav class="topbar">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">MF</span>
+        <span>
+          <strong>MEP FAN LTD</strong>
+          <small>Production Entry Sheet</small>
+        </span>
+      </a>
+      <div class="nav-links" aria-label="Primary navigation">
+        <a href="index.html">Dashboard</a>
+        <a class="active" href="entry.html">Production Entry</a>
+      </div>
+    </nav>
+
+    <header class="entry-hero">
+      <div>
+        <p class="eyebrow">Production input</p>
+        <h1>Daily Production Entry</h1>
+        <p class="hero-copy">
+          Enter daily model quantities here. Saved records stay in this browser and appear
+          immediately on the dashboard, table, charts, and CSV export.
+        </p>
+      </div>
+      <a class="button-link primary" href="index.html">Back to Dashboard</a>
+    </header>
+
+    <main class="entry-layout">
+      <section class="panel entry-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Entry sheet</p>
+            <h2>Add daily production</h2>
+          </div>
+          <p class="helper" id="entryStatus">Ready for new production entry.</p>
+        </div>
+        <form id="entryForm" class="entry-form">
+          <label>
+            Date
+            <input id="entryDate" type="date" required />
+          </label>
+          <label>
+            Target
+            <input id="entryTarget" type="number" min="0" step="1" value="1600" required />
+          </label>
+          <label>
+            Remarks
+            <input id="entryRemarks" type="text" placeholder="Optional note" />
+          </label>
+          <div id="modelInputs" class="model-inputs"></div>
+          <div class="entry-total-card">
+            <span>Entry total</span>
+            <strong id="entryPreviewTotal">0</strong>
+            <small>sum of all model quantities</small>
+          </div>
+          <button type="submit">Save production entry</button>
+        </form>
+      </section>
+
+      <aside class="panel entry-side">
+        <p class="eyebrow">Quick summary</p>
+        <h2>Saved in this browser</h2>
+        <div class="side-metric">
+          <span>Custom entries</span>
+          <strong id="customEntryCount">0</strong>
+        </div>
+        <div class="side-metric">
+          <span>Custom production</span>
+          <strong id="customProductionTotal">0</strong>
+        </div>
+        <button id="clearCustomEntries" type="button" class="button-link muted danger">
+          Clear browser entries
+        </button>
+      </aside>
+
+      <section class="panel entry-history">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Recent browser entries</p>
+            <h2>New production records</h2>
+          </div>
+          <a class="button-link compact muted" href="index.html">View on dashboard</a>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr id="customTableHead"></tr>
+            </thead>
+            <tbody id="customTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
