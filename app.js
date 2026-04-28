@@ -58,14 +58,21 @@ const elements = {
 
 function loadSavedEntries() {
   try {
-    return JSON.parse(localStorage.getItem(storageKey) || "[]");
+    const savedEntries = JSON.parse(localStorage.getItem(storageKey) || "[]");
+    return Array.isArray(savedEntries) ? savedEntries : [];
   } catch {
     return [];
   }
 }
 
 function saveEntries() {
-  localStorage.setItem(storageKey, JSON.stringify(getCustomRecords()));
+  try {
+    localStorage.setItem(storageKey, JSON.stringify(getCustomRecords()));
+  } catch {
+    if (elements.entryStatus) {
+      elements.entryStatus.textContent = "Entry saved for this page, but browser storage is blocked.";
+    }
+  }
 }
 
 function getCustomRecords() {
@@ -88,9 +95,9 @@ function getMonth(dateValue) {
 
 function getCurrentFilters() {
   return {
-    year: elements.yearFilter?.value || "all",
-    month: elements.monthFilter?.value || "all",
-    search: elements.searchFilter?.value.trim().toLowerCase() || "",
+    year: elements.yearFilter ? elements.yearFilter.value : "all",
+    month: elements.monthFilter ? elements.monthFilter.value : "all",
+    search: elements.searchFilter ? elements.searchFilter.value.trim().toLowerCase() : "",
   };
 }
 
@@ -391,7 +398,7 @@ function exportCurrentData() {
     "remarks",
   ];
   const rows = getFilteredRecords().map((record) =>
-    headers.map((header) => JSON.stringify(record[header] ?? "")).join(","),
+    headers.map((header) => JSON.stringify(record[header] === undefined ? "" : record[header])).join(","),
   );
   const csv = [headers.join(","), ...rows].join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
